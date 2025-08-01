@@ -1,8 +1,8 @@
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import './MetricCard.css';
 
-const MetricCard = ({ title, value, change, trend, color, icon: Icon, onClick }) => {
+const MetricCard = ({ title, value, change, trend, color, icon: Icon, onClick, onRemove, removable = false }) => {
   const isPositive = trend === 'up';
   
   const handleClick = () => {
@@ -11,8 +11,15 @@ const MetricCard = ({ title, value, change, trend, color, icon: Icon, onClick })
     }
   };
   
+  const handleRemove = (e) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    if (onRemove) {
+      onRemove();
+    }
+  };
+  
   return (
-    <div className="metric-card" onClick={handleClick}>
+    <div className={`metric-card ${removable ? 'removable' : ''}`} onClick={handleClick}>
       <div className="metric-header">
         <div className="metric-info">
           <h3 className="metric-title">{title}</h3>
@@ -83,7 +90,16 @@ const MetricCard = ({ title, value, change, trend, color, icon: Icon, onClick })
           </svg>
         </div>
       </div>
-
+      
+      {removable && (
+        <button 
+          className="remove-kpi-btn" 
+          onClick={handleRemove}
+          title="Remove KPI"
+        >
+          <Trash2 size={14} />
+        </button>
+      )}
     </div>
   );
 };

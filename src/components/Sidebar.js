@@ -12,7 +12,7 @@ import {
   Clock,
   X
 } from 'lucide-react';
-import MIALogo from './MIALogo';
+
 import './Sidebar.css';
 
 const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, isCollapsed }) => {
@@ -69,7 +69,12 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
       <div className="sidebar-header">
         <div className="logo-section">
           <div className="logo-container">
-            <MIALogo className="logo-icon" size={60} />
+            <img 
+              src="/MIA LOOG 2.png" 
+              alt="MIA Logo" 
+              className="logo-icon"
+              style={{ width: '80px', height: 'auto' }}
+            />
             {!isCollapsed && (
               <div className="logo-text-container">
                 <h1 className="logo-title">Marketing Intelligence Agent</h1>

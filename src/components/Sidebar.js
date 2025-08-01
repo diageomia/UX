@@ -131,23 +131,23 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
             </div>
 
             <div className="nav-section chat-history-section">
-              <div className="section-header">
+              <div className="section-header chat-history-header">
                 <div className="section-title-group">
                   <h3 className="section-title">CHAT HISTORY</h3>
-                  <button 
-                    className={`search-toggle-btn ${isSearchVisible ? 'active' : ''}`}
-                    onClick={() => {
-                      setIsSearchVisible(!isSearchVisible);
-                      if (isSearchVisible) {
-                        setSearchTerm('');
-                      }
-                    }}
-                    title={isSearchVisible ? 'Hide search' : 'Search chat history'}
-                  >
-                    <Search size={12} />
-                  </button>
+                  <span className="chat-count">({filteredChatHistory.length})</span>
                 </div>
-                <span className="chat-count">({filteredChatHistory.length})</span>
+                <button 
+                  className={`search-toggle-btn ${isSearchVisible ? 'active' : ''}`}
+                  onClick={() => {
+                    setIsSearchVisible(!isSearchVisible);
+                    if (isSearchVisible) {
+                      setSearchTerm('');
+                    }
+                  }}
+                  title={isSearchVisible ? 'Hide search' : 'Search chat history'}
+                >
+                  <Search size={12} />
+                </button>
               </div>
               
               {/* Search Chat History - Conditionally Rendered */}

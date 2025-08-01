@@ -98,6 +98,28 @@
   min-height: 0;
 }
 
+/* Chat History Header */
+.chat-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+.chat-history-header .section-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-history-header .section-title {
+  margin: 0;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+}
+
 .section-header {
   display: flex;
   align-items: center;
@@ -105,11 +127,11 @@
   margin-bottom: 8px;
 }
 
-.section-title-group {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
+
+
+
+
+
 
 .search-toggle-btn {
   background: none;
@@ -125,7 +147,7 @@
   height: 20px;
   width: 20px;
   position: relative;
-  top: -1px;
+  top: 0;
 }
 
 .search-toggle-btn:hover {
@@ -276,12 +298,12 @@
 }
 
 .chat-item {
-  padding: 12px 14px !important;
-  align-items: flex-start !important;
-  border-radius: 8px !important;
-  margin-bottom: 4px !important;
-  transition: all 0.3s ease !important;
-  border: 1px solid transparent !important;
+  padding: 12px 20px;
+  align-items: flex-start;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
 .chat-item .nav-icon {
@@ -291,9 +313,9 @@
 }
 
 .chat-item:hover {
-  background: rgba(139, 95, 191, 0.1) !important;
-  border-color: rgba(139, 95, 191, 0.2) !important;
-  transform: translateX(2px) !important;
+  background: rgba(139, 95, 191, 0.1);
+  border-color: rgba(139, 95, 191, 0.2);
+  transform: translateX(2px);
 }
 
 .chat-item:hover .nav-icon {
@@ -305,8 +327,8 @@
 }
 
 .chat-item.active {
-  background: rgba(139, 95, 191, 0.2) !important;
-  border-color: rgba(139, 95, 191, 0.4) !important;
+  background: rgba(139, 95, 191, 0.2);
+  border-color: rgba(139, 95, 191, 0.4);
 }
 
 .empty-chat-history {
@@ -416,16 +438,6 @@
   text-align: center;
 }
 
-.chat-item {
-  padding-left: 24px;
-  font-size: 13px;
-}
-
-.chat-item .nav-icon {
-  width: 16px;
-  height: 16px;
-}
-
 .sidebar-footer {
   padding: 20px 0;
   border-top: 1px solid #334155;
@@ -485,10 +497,12 @@
   background: #64748b;
 }
 
+
+
 /* Animation for collapsed state */
 .sidebar .nav-label,
 .sidebar .logo-text-container,
-.sidebar .section-title,
+.chat-header .section-title,
 .sidebar .nav-badge {
   transition: opacity 0.2s ease;
 }

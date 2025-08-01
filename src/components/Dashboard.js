@@ -15,32 +15,172 @@ const Dashboard = ({ onLogout }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isKpiModalOpen, setIsKpiModalOpen] = useState(false);
   const [kpiSearchTerm, setKpiSearchTerm] = useState('');
+  const [selectedKpiCategory, setSelectedKpiCategory] = useState('all');
+  // Track which KPIs have been selected in the modal before confirming
+  const [selectedKpiIds, setSelectedKpiIds] = useState([]);
   
-  // Available KPIs for selection
-  const availableKpis = [
-    { id: 'brand_awareness', name: 'Brand Awareness', category: 'Brand', description: 'Percentage of target audience familiar with brand' },
-    { id: 'campaign_roi', name: 'Campaign ROI', category: 'Financial', description: 'Return on investment for marketing campaigns' },
-    { id: 'social_engagement', name: 'Social Engagement', category: 'Social', description: 'Total interactions across social platforms' },
-    { id: 'market_share', name: 'Market Share', category: 'Competitive', description: 'Percentage of market captured by brand' },
-    { id: 'customer_ltv', name: 'Customer Lifetime Value', category: 'Financial', description: 'Average revenue per customer over their lifetime' },
-    { id: 'conversion_rate', name: 'Conversion Rate', category: 'Performance', description: 'Percentage of visitors who complete desired action' },
-    { id: 'cost_per_acquisition', name: 'Cost Per Acquisition', category: 'Financial', description: 'Average cost to acquire a new customer' },
-    { id: 'email_open_rate', name: 'Email Open Rate', category: 'Email', description: 'Percentage of emails opened by recipients' },
-    { id: 'click_through_rate', name: 'Click-Through Rate', category: 'Performance', description: 'Percentage of users who click on specific link' },
-    { id: 'net_promoter_score', name: 'Net Promoter Score', category: 'Satisfaction', description: 'Customer loyalty and satisfaction metric' },
-    { id: 'website_traffic', name: 'Website Traffic', category: 'Digital', description: 'Number of visitors to website over time period' },
-    { id: 'bounce_rate', name: 'Bounce Rate', category: 'Digital', description: 'Percentage of visitors who leave after viewing one page' },
-    { id: 'social_reach', name: 'Social Media Reach', category: 'Social', description: 'Number of unique users who see social content' },
-    { id: 'lead_generation', name: 'Lead Generation', category: 'Sales', description: 'Number of potential customers identified' },
-    { id: 'customer_retention', name: 'Customer Retention Rate', category: 'Retention', description: 'Percentage of customers retained over period' }
-  ];
-  
-  // Filter KPIs based on search term
-  const filteredKpis = availableKpis.filter(kpi => 
-    kpi.name.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
-    kpi.category.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
-    kpi.description.toLowerCase().includes(kpiSearchTerm.toLowerCase())
-  );
+  // Enhanced KPI data with values, changes, and categories - Only specified KPIs
+  const availableKpis = {
+    brandAwareness: [
+      { 
+        id: 'brand_sentiment', 
+        name: 'Brand Sentiment', 
+        category: 'Brand & Awareness',
+        description: 'Overall sentiment analysis across all channels',
+        value: '78%',
+        change: '+5%',
+        trend: 'up',
+        recommended: true
+      },
+      { 
+        id: 'brand_mentions', 
+        name: 'Brand Mentions', 
+        category: 'Brand & Awareness',
+        description: 'Total mentions across social media and web',
+        value: '12.4K',
+        change: '+18%',
+        trend: 'up',
+        popular: true
+      },
+      { 
+        id: 'share_of_voice', 
+        name: 'Share of Voice', 
+        category: 'Brand & Awareness',
+        description: 'Brand visibility vs competitors',
+        value: '23%',
+        change: '+3%',
+        trend: 'up'
+      }
+    ],
+    performanceROI: [
+      { 
+        id: 'customer_acquisition_cost', 
+        name: 'Customer Acquisition Cost', 
+        category: 'Performance & ROI',
+        description: 'Average cost to acquire a new customer',
+        value: '$45',
+        change: '-12%',
+        trend: 'down',
+        recommended: true
+      },
+      { 
+        id: 'conversion_rate', 
+        name: 'Conversion Rate', 
+        category: 'Performance & ROI',
+        description: 'Percentage of visitors who convert',
+        value: '3.2%',
+        change: '-0.8%',
+        trend: 'down',
+        popular: true
+      },
+      { 
+        id: 'customer_lifetime_value', 
+        name: 'Customer Lifetime Value', 
+        category: 'Performance & ROI',
+        description: 'Average revenue per customer over time',
+        value: '$1,250',
+        change: '+15%',
+        trend: 'up'
+      }
+    ],
+    socialEngagement: [
+      { 
+        id: 'social_reach', 
+        name: 'Social Reach', 
+        category: 'Social & Engagement',
+        description: 'Total reach across all social platforms',
+        value: '850K',
+        change: '+22%',
+        trend: 'up',
+        popular: true
+      },
+      { 
+        id: 'engagement_quality', 
+        name: 'Engagement Quality', 
+        category: 'Social & Engagement',
+        description: 'Meaningful interactions vs total engagement',
+        value: '85%',
+        change: '+7%',
+        trend: 'up',
+        recommended: true
+      },
+      { 
+        id: 'influencer_impact', 
+        name: 'Influencer Impact', 
+        category: 'Social & Engagement',
+        description: 'ROI from influencer partnerships',
+        value: '420%',
+        change: '+35%',
+        trend: 'up'
+      }
+    ],
+    digitalWeb: [
+      { 
+        id: 'website_traffic', 
+        name: 'Website Traffic', 
+        category: 'Digital & Web',
+        description: 'Unique visitors to your website',
+        value: '125K',
+        change: '+8%',
+        trend: 'up',
+        popular: true
+      },
+      { 
+        id: 'bounce_rate', 
+        name: 'Bounce Rate', 
+        category: 'Digital & Web',
+        description: 'Percentage of single-page sessions',
+        value: '32%',
+        change: '-5%',
+        trend: 'down'
+      }
+    ]
+  };
+
+  // Get KPIs based on selected category
+  const getFilteredKpis = () => {
+    let kpisToShow = [];
+    
+    if (selectedKpiCategory === 'all') {
+      kpisToShow = [
+        ...availableKpis.brandAwareness,
+        ...availableKpis.performanceROI,
+        ...availableKpis.socialEngagement,
+        ...availableKpis.digitalWeb
+      ];
+    } else if (selectedKpiCategory === 'brand') {
+      kpisToShow = availableKpis.brandAwareness;
+    } else if (selectedKpiCategory === 'performance') {
+      kpisToShow = availableKpis.performanceROI;
+    } else if (selectedKpiCategory === 'social') {
+      kpisToShow = availableKpis.socialEngagement;
+    } else if (selectedKpiCategory === 'digital') {
+      kpisToShow = availableKpis.digitalWeb;
+    }
+    
+    // Filter by search term if provided
+    if (kpiSearchTerm) {
+      kpisToShow = kpisToShow.filter(kpi => 
+        kpi.name.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
+        kpi.category.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
+        kpi.description.toLowerCase().includes(kpiSearchTerm.toLowerCase())
+      );
+    }
+    
+    return kpisToShow;
+  };
+
+  // Category counts
+  const getCategoryCount = (category) => {
+    switch(category) {
+      case 'all': return Object.values(availableKpis).flat().length;
+      case 'brand': return availableKpis.brandAwareness.length;
+      case 'performance': return availableKpis.performanceROI.length;
+      case 'social': return availableKpis.socialEngagement.length;
+      case 'digital': return availableKpis.digitalWeb.length;
+      default: return 0;
+    }
+  };
   
   const [chatHistory, setChatHistory] = useState([
     {
@@ -113,17 +253,8 @@ const Dashboard = ({ onLogout }) => {
       color: '#ef4444',
       icon: Share2,
       removable: true
-    },
-    {
-      id: 'market_share',
-      title: 'Market Share',
-      value: '15.2%',
-      change: '+2.1%',
-      trend: 'up',
-      color: '#8b5cf6',
-      icon: TrendingUp,
-      removable: true
     }
+
   ]);
 
   const alerts = [
@@ -315,9 +446,40 @@ const Dashboard = ({ onLogout }) => {
     setKpiSearchTerm('');
   };
   
+  // Toggle KPI selection inside the modal
   const handleKpiSelect = (kpi) => {
-    console.log('Selected KPI:', kpi);
-    // Here you would add logic to add the KPI to the dashboard
+    setSelectedKpiIds(prev =>
+      prev.includes(kpi.id)
+        ? prev.filter(id => id !== kpi.id)
+        : [...prev, kpi.id]
+    );
+  };
+
+  // Confirm selected KPIs and add them to the dashboard
+  const handleKpiDone = () => {
+    if (selectedKpiIds.length) {
+      // Flatten all available KPIs into a single array for lookup
+      const allAvailable = Object.values(availableKpis).flat();
+      const newlySelected = allAvailable.filter(k => selectedKpiIds.includes(k.id));
+
+      setKpis(prev => {
+        const existingIds = prev.map(k => k.id);
+        const toAdd = newlySelected.filter(k => !existingIds.includes(k.id)).map(k => ({
+          id: k.id,
+          title: k.name,
+          value: k.value,
+          change: k.change,
+          trend: k.trend,
+          color: k.trend === 'up' ? '#10b981' : '#ef4444',
+          icon: k.trend === 'up' ? TrendingUp : TrendingDown,
+          removable: true
+        }));
+        return [...prev, ...toAdd];
+      });
+    }
+
+    // Reset selection & close modal
+    setSelectedKpiIds([]);
     closeKpiModal();
   };
   
@@ -600,7 +762,10 @@ const Dashboard = ({ onLogout }) => {
         <div className="modal-overlay" onClick={closeKpiModal}>
           <div className="kpi-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">Add New KPI</h2>
+              <div className="modal-header-content">
+                <h2 className="modal-title">Add New KPI</h2>
+                <p className="modal-subtitle">Choose from our curated list of marketing KPIs to track what matters most</p>
+              </div>
               <button className="modal-close-btn" onClick={closeKpiModal}>
                 <X size={24} />
               </button>
@@ -618,32 +783,210 @@ const Dashboard = ({ onLogout }) => {
                 />
               </div>
             </div>
+
+            {/* Enhanced Category Tabs */}
+            <div className="kpi-categories">
+              <button 
+                className={`category-tab ${selectedKpiCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedKpiCategory('all')}
+              >
+                All KPIs <span className="category-count">{getCategoryCount('all')}</span>
+              </button>
+              <button 
+                className={`category-tab ${selectedKpiCategory === 'brand' ? 'active' : ''}`}
+                onClick={() => setSelectedKpiCategory('brand')}
+              >
+                Brand & Awareness <span className="category-count">{getCategoryCount('brand')}</span>
+              </button>
+              <button 
+                className={`category-tab ${selectedKpiCategory === 'performance' ? 'active' : ''}`}
+                onClick={() => setSelectedKpiCategory('performance')}
+              >
+                Performance & ROI <span className="category-count">{getCategoryCount('performance')}</span>
+              </button>
+              <button 
+                className={`category-tab ${selectedKpiCategory === 'social' ? 'active' : ''}`}
+                onClick={() => setSelectedKpiCategory('social')}
+              >
+                Social & Engagement <span className="category-count">{getCategoryCount('social')}</span>
+              </button>
+              <button 
+                className={`category-tab ${selectedKpiCategory === 'digital' ? 'active' : ''}`}
+                onClick={() => setSelectedKpiCategory('digital')}
+              >
+                Digital & Web <span className="category-count">{getCategoryCount('digital')}</span>
+              </button>
+            </div>
             
-            <div className="kpi-list">
-              {filteredKpis.length === 0 ? (
-                <div className="no-results">
-                  <p>No KPIs found matching your search.</p>
-                </div>
-              ) : (
-                filteredKpis.map((kpi) => (
-                  <div 
-                    key={kpi.id} 
-                    className="kpi-item"
-                    onClick={() => handleKpiSelect(kpi)}
-                  >
-                    <div className="kpi-info">
-                      <div className="kpi-header">
-                        <h3 className="kpi-name">{kpi.name}</h3>
-                        <span className="kpi-category">{kpi.category}</span>
-                      </div>
-                      <p className="kpi-description">{kpi.description}</p>
+            <div className="kpi-content">
+              {selectedKpiCategory === 'all' && (
+                <>
+                  {/* Recommended for You Section */}
+                  <div className="recommended-section">
+                    <div className="section-header">
+                      <div className="section-indicator"></div>
+                      <h3>Recommended for You</h3>
                     </div>
-                    <div className="kpi-add-icon">
-                      <Plus size={20} />
+                    <div className="kpi-grid">
+                      {[...availableKpis.brandAwareness, ...availableKpis.performanceROI, ...availableKpis.socialEngagement, ...availableKpis.digitalWeb]
+                        .filter(kpi => kpi.recommended)
+                        .map((kpi) => (
+                        <div key={kpi.id} className="kpi-card">
+                          <div className="kpi-card-header">
+                            <div className="kpi-icon">
+                              {kpi.trend === 'up' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                            </div>
+                            <div className="kpi-badges">
+                              {kpi.recommended && <span className="kpi-badge recommended">Recommended</span>}
+                              {kpi.popular && <span className="kpi-badge popular">Popular</span>}
+                            </div>
+                          </div>
+                          <h4 className="kpi-card-title">{kpi.name}</h4>
+                          <p className="kpi-card-description">{kpi.description}</p>
+                          <div className="kpi-metrics">
+                            <div className="kpi-value">{kpi.value}</div>
+                            <div className={`kpi-change ${kpi.trend}`}>{kpi.change}</div>
+                            <div className="kpi-chart">
+                              <div className="mini-chart"></div>
+                            </div>
+                          </div>
+                          <button 
+                            className={`add-kpi-btn ${selectedKpiIds.includes(kpi.id) ? 'added' : ''}` }
+                            onClick={() => handleKpiSelect(kpi)}
+                          >
+                            {selectedKpiIds.includes(kpi.id) ? 'Added KPI' : (<><Plus size={16} /> Add KPI</>)}
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))
+
+                  {/* Popular Choices Section */}
+                  <div className="popular-section">
+                    <div className="section-header">
+                      <div className="section-indicator popular"></div>
+                      <h3>Popular Choices</h3>
+                    </div>
+                    <div className="kpi-grid">
+                      {[...availableKpis.brandAwareness, ...availableKpis.performanceROI, ...availableKpis.socialEngagement, ...availableKpis.digitalWeb]
+                        .filter(kpi => kpi.popular)
+                        .map((kpi) => (
+                        <div key={`popular-${kpi.id}`} className="kpi-card">
+                          <div className="kpi-card-header">
+                            <div className="kpi-icon">
+                              {kpi.trend === 'up' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                            </div>
+                            <div className="kpi-badges">
+                              {kpi.recommended && <span className="kpi-badge recommended">Recommended</span>}
+                              {kpi.popular && <span className="kpi-badge popular">Popular</span>}
+                            </div>
+                          </div>
+                          <h4 className="kpi-card-title">{kpi.name}</h4>
+                          <p className="kpi-card-description">{kpi.description}</p>
+                          <div className="kpi-metrics">
+                            <div className="kpi-value">{kpi.value}</div>
+                            <div className={`kpi-change ${kpi.trend}`}>{kpi.change}</div>
+                            <div className="kpi-chart">
+                              <div className="mini-chart"></div>
+                            </div>
+                          </div>
+                          <button 
+                            className={`add-kpi-btn ${selectedKpiIds.includes(kpi.id) ? 'added' : ''}` }
+                            onClick={() => handleKpiSelect(kpi)}
+                          >
+                            {selectedKpiIds.includes(kpi.id) ? 'Added KPI' : (<><Plus size={16} /> Add KPI</>)}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* All Available KPIs Section */}
+                  <div className="all-kpis-section">
+                    <div className="section-header">
+                      <div className="section-indicator all"></div>
+                      <h3>All Available KPIs</h3>
+                    </div>
+                    <div className="kpi-grid">
+                      {[...availableKpis.brandAwareness, ...availableKpis.performanceROI, ...availableKpis.socialEngagement, ...availableKpis.digitalWeb]
+                        .filter(kpi => !kpi.popular && !kpi.recommended)
+                        .map((kpi) => (
+                        <div key={`all-${kpi.id}`} className="kpi-card">
+                          <div className="kpi-card-header">
+                            <div className="kpi-icon">
+                              {kpi.trend === 'up' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                            </div>
+                            <div className="kpi-badges">
+                              {kpi.recommended && <span className="kpi-badge recommended">Recommended</span>}
+                              {kpi.popular && <span className="kpi-badge popular">Popular</span>}
+                            </div>
+                          </div>
+                          <h4 className="kpi-card-title">{kpi.name}</h4>
+                          <p className="kpi-card-description">{kpi.description}</p>
+                          <div className="kpi-metrics">
+                            <div className="kpi-value">{kpi.value}</div>
+                            <div className={`kpi-change ${kpi.trend}`}>{kpi.change}</div>
+                            <div className="kpi-chart">
+                              <div className="mini-chart"></div>
+                            </div>
+                          </div>
+                          <button 
+                            className={`add-kpi-btn ${selectedKpiIds.includes(kpi.id) ? 'added' : ''}` }
+                            onClick={() => handleKpiSelect(kpi)}
+                          >
+                            {selectedKpiIds.includes(kpi.id) ? 'Added KPI' : (<><Plus size={16} /> Add KPI</>)}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
+              
+              <div className="kpi-list-section">
+                {getFilteredKpis().length === 0 ? (
+                  <div className="no-results">
+                    <p>No KPIs found matching your search.</p>
+                  </div>
+                ) : (
+                  <div className="kpi-grid">
+                    {getFilteredKpis().map((kpi) => (
+                      <div key={kpi.id} className="kpi-card">
+                        <div className="kpi-card-header">
+                          <div className="kpi-icon">
+                            {kpi.trend === 'up' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                          </div>
+                          <div className="kpi-badges">
+                            {kpi.recommended && <span className="kpi-badge recommended">Recommended</span>}
+                            {kpi.popular && <span className="kpi-badge popular">Popular</span>}
+                          </div>
+                        </div>
+                        <h4 className="kpi-card-title">{kpi.name}</h4>
+                        <p className="kpi-card-description">{kpi.description}</p>
+                        <div className="kpi-metrics">
+                          <div className="kpi-value">{kpi.value}</div>
+                          <div className={`kpi-change ${kpi.trend}`}>{kpi.change}</div>
+                          <div className="kpi-chart">
+                            <div className="mini-chart"></div>
+                          </div>
+                        </div>
+                        <button 
+                          className={`add-kpi-btn ${selectedKpiIds.includes(kpi.id) ? 'added' : ''}` }
+                          onClick={() => handleKpiSelect(kpi)}
+                        >
+                          {selectedKpiIds.includes(kpi.id) ? 'Added KPI' : (<><Plus size={16} /> Add KPI</>)}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="done-btn" onClick={handleKpiDone}>
+                Done
+              </button>
             </div>
           </div>
         </div>

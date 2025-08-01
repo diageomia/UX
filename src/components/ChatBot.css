@@ -39,8 +39,8 @@
 
 .chatbot-avatar {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 200px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +49,8 @@
 .avatar-icon {
   position: relative;
   z-index: 2;
+  width: 160px;
+  height: auto;
 }
 
 .status-indicator {

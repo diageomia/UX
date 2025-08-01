@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Sparkles, Zap, MessageCircle, Bot } from 'lucide-react';
-import MIALogo from './MIALogo';
 import './ChatBot.css';
 
 const ChatBot = () => {
@@ -102,7 +101,12 @@ const ChatBot = () => {
     <div className="chatbot-container">
       <div className="chatbot-header">
         <div className="chatbot-avatar">
-          <MIALogo className="avatar-icon" size={64} />
+          <img 
+            src="/MIA LOOG 2.png" 
+            alt="MIA Logo" 
+            className="avatar-icon"
+            
+          />
           <div className="status-indicator"></div>
         </div>
         <div className="chatbot-info">
@@ -125,7 +129,11 @@ const ChatBot = () => {
             <div className="message-avatar">
               {message.type === 'bot' ? (
                 <div className="bot-avatar">
-                  <MIALogo size={40} />
+                  <img 
+                    src="/MIA LOOG 2.png" 
+                    alt="MIA Logo" 
+                    style={{ width: '36px', height: 'auto' }}
+                  />
                   <div className="avatar-glow"></div>
                 </div>
               ) : (
@@ -150,7 +158,11 @@ const ChatBot = () => {
           <div className="message bot typing">
             <div className="message-avatar">
               <div className="bot-avatar">
-                <MIALogo size={40} />
+                <img 
+                  src="/MIA LOOG 2.png" 
+                  alt="MIA Logo" 
+                  style={{ width: '36px', height: 'auto' }}
+                />
                 <div className="avatar-glow pulsing"></div>
               </div>
             </div>

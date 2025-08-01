@@ -291,80 +291,11 @@
   margin-bottom: 2px;
 }
 
-.metrics-subtitle-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .welcome-subtitle {
   color: #64748b;
   font-size: 16px;
   margin: 0;
-}
-
-.add-metric-btn {
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 6px;
-  color: #667eea;
-  padding: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.add-metric-btn:hover {
-  background: rgba(102, 126, 234, 0.15);
-  border-color: rgba(102, 126, 234, 0.3);
-  transform: translateY(-1px);
-}
-
-/* Tooltip Container */
-.add-metric-btn-container {
-  position: relative;
-  display: inline-block;
-}
-
-/* Tooltip */
-.add-metric-btn-container .tooltip {
-  visibility: hidden;
-  opacity: 0;
-  background: #1e293b;
-  color: white;
-  text-align: center;
-  border-radius: 8px;
-  padding: 8px 12px;
-  position: absolute;
-  z-index: 1002;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -60px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-/* Tooltip Arrow */
-.add-metric-btn-container .tooltip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #1e293b transparent transparent transparent;
-}
-
-/* Show tooltip on hover */
-.add-metric-btn-container:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
+  font-weight: 400;
 }
 
 .header-actions {
@@ -421,10 +352,112 @@
   scroll-behavior: smooth;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+/* KPIs Section */
+.kpis-section {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  margin-bottom: 16px;
+}
+
+.kpis-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpis-title-section .section-title {
+  color: #1e293b !important;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.kpis-scrollable-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.kpis-scrollable-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.kpis-scrollable-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kpis-scrollable-container::-webkit-scrollbar-thumb {
+  background-color: #e2e8f0;
+  border-radius: 3px;
+}
+
+.kpis-scrollable-container::-webkit-scrollbar-thumb:hover {
+  background-color: #cbd5e1;
+}
+
+.kpis-horizontal-grid {
+  display: flex;
   gap: 16px;
+  padding: 4px 0;
+  min-width: min-content;
+}
+
+.kpis-horizontal-grid > * {
+  flex: none;
+  min-width: 260px;
+}
+
+/* Add KPI Card */
+.add-kpi-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f1f5f9 100%);
+  border: 2px dashed #8B5CF6;
+  border-radius: 16px;
+  padding: 24px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-kpi-card:hover {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.25);
+}
+
+.add-kpi-card:hover .add-kpi-content {
+  color: white;
+}
+
+.add-kpi-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #8B5CF6;
+  transition: color 0.3s ease;
+}
+
+.add-kpi-icon {
+  stroke-width: 1.5;
+}
+
+.add-kpi-text {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .alerts-section {
@@ -605,17 +638,17 @@
 }
 
 .chat-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8B5FBF 0%, #E91E63 100%);
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   margin-bottom: 16px;
-  box-shadow: 0 8px 32px rgba(139, 95, 191, 0.4);
-  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.chat-logo img {
+  width: 100%;
+  height: auto;
 }
 
 @keyframes logoFloat {
@@ -938,12 +971,9 @@
   position: relative;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8B5FBF 0%, #E91E63 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   animation: avatarGlow 2s ease-in-out infinite alternate;
 }
 
@@ -1108,13 +1138,9 @@
 .response-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8B5FBF 0%, #E91E63 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
 }
 
 .response-meta h4 {
@@ -1194,9 +1220,12 @@
     gap: 16px;
   }
   
-  .metrics-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
+  .kpis-horizontal-grid > * {
+    min-width: 240px;
+  }
+  
+  .add-kpi-card {
+    min-width: 240px;
   }
   
   .chat-section {
@@ -1228,8 +1257,12 @@
     gap: 24px;
   }
   
-  .metrics-grid {
-    grid-template-columns: 1fr;
+  .kpis-horizontal-grid > * {
+    min-width: 280px;
+  }
+  
+  .add-kpi-card {
+    min-width: 280px;
   }
   
   .prompts-grid {

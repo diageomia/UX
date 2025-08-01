@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Share2, AlertTriangle, ChevronDown, ChevronUp, Bell, Search, Clock, User, Plus, Paperclip, MessageSquarePlus, Menu, X, RotateCcw } from 'lucide-react';
-import MIALogo from './MIALogo';
+
 import './Dashboard.css';
 import Sidebar from './Sidebar';
 import MetricCard from './MetricCard';
@@ -83,40 +83,48 @@ const Dashboard = ({ onLogout }) => {
     'Market Share': 'Analyze our market share growth and identify expansion opportunities?'
   };
 
-  const kpis = [
+  const [kpis, setKpis] = useState([
     {
+      id: 'brand_awareness',
       title: 'Brand Awareness',
       value: '87%',
       change: '+12%',
       trend: 'up',
       color: '#10b981',
-      icon: TrendingUp
+      icon: TrendingUp,
+      removable: true
     },
     {
+      id: 'campaign_roi',
       title: 'Campaign ROI',
       value: '324%',
       change: '+45%',
       trend: 'up',
       color: '#3b82f6',
-      icon: BarChart3
+      icon: BarChart3,
+      removable: true
     },
     {
+      id: 'social_engagement',
       title: 'Social Engagement',
       value: '2.4M',
       change: '-8%',
       trend: 'down',
       color: '#ef4444',
-      icon: Share2
+      icon: Share2,
+      removable: true
     },
     {
+      id: 'market_share',
       title: 'Market Share',
       value: '15.2%',
       change: '+2.1%',
       trend: 'up',
       color: '#8b5cf6',
-      icon: TrendingUp
+      icon: TrendingUp,
+      removable: true
     }
-  ];
+  ]);
 
   const alerts = [
     {
@@ -313,6 +321,11 @@ const Dashboard = ({ onLogout }) => {
     closeKpiModal();
   };
   
+  // Handle KPI removal
+  const handleKpiRemove = (kpiId) => {
+    setKpis(prevKpis => prevKpis.filter(kpi => kpi.id !== kpiId));
+  };
+  
   // Handle clear chat functionality
   const handleClearChat = () => {
     setSearchQuery('');
@@ -366,21 +379,9 @@ const Dashboard = ({ onLogout }) => {
               <h1 className="welcome-title">
                 Hey Sarah! 👋
               </h1>
-              <div className="metrics-subtitle-container">
-                <p className="welcome-subtitle">
-                  Key KPIs that might help you today
-                </p>
-                <div className="add-metric-btn-container">
-                  <button 
-                    className="add-metric-btn" 
-                    title="Add new KPI"
-                    onClick={openKpiModal}
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <div className="tooltip">Add new KPI</div>
-                </div>
-              </div>
+              <p className="welcome-subtitle">
+                Welcome back, Brand Manager at Diageo
+              </p>
             </div>
             
             <div className="header-actions">
@@ -396,16 +397,32 @@ const Dashboard = ({ onLogout }) => {
         </header>
 
         <div className="dashboard-content">
-          {/* KPIs Grid */}
+          {/* KPIs Section */}
           <section className="kpis-section">
-            <div className="metrics-grid">
-              {kpis.map((kpi, index) => (
-                <MetricCard 
-                  key={index}
-                  {...kpi} 
-                  onClick={() => handleKpiClick(kpi.title)}
-                />
-              ))}
+            <div className="section-header">
+              <div className="kpis-title-section">
+                <BarChart3 className="section-icon" size={20} />
+                <h2 className="section-title">Your Key Performance Indicators</h2>
+              </div>
+            </div>
+            <div className="kpis-scrollable-container">
+              <div className="kpis-horizontal-grid">
+                {kpis.map((kpi, index) => (
+                  <MetricCard 
+                    key={kpi.id}
+                    {...kpi} 
+                    onClick={() => handleKpiClick(kpi.title)}
+                    onRemove={() => handleKpiRemove(kpi.id)}
+                  />
+                ))}
+                {/* Add New KPI Button */}
+                <div className="add-kpi-card" onClick={openKpiModal}>
+                  <div className="add-kpi-content">
+                    <Plus size={24} className="add-kpi-icon" />
+                    <span className="add-kpi-text">Add new KPI</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -441,7 +458,11 @@ const Dashboard = ({ onLogout }) => {
             <div className="chat-title-container">
               <div className="chat-header-content">
                 <div className="chat-logo">
-                  <MIALogo size={32} />
+                  <img 
+                    src="/MIA LOOG 2.png" 
+                    alt="MIA Logo" 
+                    
+                  />
                 </div>
                 <div className="chat-title-content">
                   <h2 className="chat-title">Ask MIA Anything</h2>
@@ -455,13 +476,7 @@ const Dashboard = ({ onLogout }) => {
               <div className="mia-response-container" ref={responseRef}>
                 {isLoading ? (
                   <div className="response-loading">
-                    <div className="loading-avatar">
-                      <MIALogo size={24} />
-                      <div className="loading-pulse"></div>
-                      <div className="loading-orbit">
-                        <div className="orbit-dot"></div>
-                      </div>
-                    </div>
+                    
                     <div className="loading-text">
                       <div className="typing-dots">
                         <span></span>
@@ -478,7 +493,11 @@ const Dashboard = ({ onLogout }) => {
                   <div className="ai-response">
                     <div className="response-header">
                       <div className="response-avatar">
-                        <MIALogo size={18} />
+                        <img 
+                          src="/MIA LOOG 2.png" 
+                          alt="MIA Logo" 
+                          style={{ width: '24px', height: 'auto' }}
+                        />
                       </div>
                       <div className="response-meta">
                         <h4>MIA Analysis</h4>

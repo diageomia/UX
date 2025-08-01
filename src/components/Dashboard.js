@@ -139,8 +139,9 @@ const Dashboard = ({ onLogout }) => {
 
   // Get KPIs based on selected category
   const getFilteredKpis = () => {
+    const term = kpiSearchTerm.trim().toLowerCase();
     let kpisToShow = [];
-    
+
     if (selectedKpiCategory === 'all') {
       kpisToShow = [
         ...availableKpis.brandAwareness,
@@ -157,29 +158,45 @@ const Dashboard = ({ onLogout }) => {
     } else if (selectedKpiCategory === 'digital') {
       kpisToShow = availableKpis.digitalWeb;
     }
-    
-    // Filter by search term if provided
-    if (kpiSearchTerm) {
-      kpisToShow = kpisToShow.filter(kpi => 
-        kpi.name.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
-        kpi.category.toLowerCase().includes(kpiSearchTerm.toLowerCase()) ||
-        kpi.description.toLowerCase().includes(kpiSearchTerm.toLowerCase())
-      );
+
+    if (!term) {
+      return kpisToShow;
     }
-    
-    return kpisToShow;
+
+    return kpisToShow.filter(kpi =>
+      kpi.name.toLowerCase().includes(term)
+    );
   };
 
   // Category counts
   const getCategoryCount = (category) => {
-    switch(category) {
-      case 'all': return Object.values(availableKpis).flat().length;
-      case 'brand': return availableKpis.brandAwareness.length;
-      case 'performance': return availableKpis.performanceROI.length;
-      case 'social': return availableKpis.socialEngagement.length;
-      case 'digital': return availableKpis.digitalWeb.length;
-      default: return 0;
+    let slice = [];
+    switch (category) {
+      case 'all':
+        slice = Object.values(availableKpis).flat();
+        break;
+      case 'brand':
+        slice = availableKpis.brandAwareness;
+        break;
+      case 'performance':
+        slice = availableKpis.performanceROI;
+        break;
+      case 'social':
+        slice = availableKpis.socialEngagement;
+        break;
+      case 'digital':
+        slice = availableKpis.digitalWeb;
+        break;
+      default:
+        slice = [];
     }
+    if (!kpiSearchTerm.trim()) {
+      return slice.length;
+    }
+    const term = kpiSearchTerm.trim().toLowerCase();
+    return slice.filter(kpi =>
+      kpi.name.toLowerCase().includes(term)
+    ).length;
   };
   
   const [chatHistory, setChatHistory] = useState([
@@ -819,7 +836,7 @@ const Dashboard = ({ onLogout }) => {
             </div>
             
             <div className="kpi-content">
-              {selectedKpiCategory === 'all' && (
+              {!kpiSearchTerm && selectedKpiCategory === 'all' && (
                 <>
                   {/* Recommended for You Section */}
                   <div className="recommended-section">

@@ -34,8 +34,8 @@
 /* Expand Sidebar Button */
 .expand-sidebar-btn {
   position: fixed;
-  top: 24px;
-  left: 24px;
+  top: 26px;
+  left: 12px;
   width: 48px;
   height: 48px;
   background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);

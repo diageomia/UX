@@ -15,6 +15,8 @@
 
 .sidebar.collapsed {
   width: 72px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-right: 1px solid #334155;
 }
 
 .sidebar-header {
@@ -36,9 +38,35 @@
   gap: 12px;
 }
 
+.logo-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.collapsed-logo-icon {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3)) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
 .logo-icon {
   flex-shrink: 0;
-  /* No background or padding - just the pure burst logo */
+  transition: all 0.3s ease;
+  filter: brightness(1.1);
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 20px 10px;
+  border-bottom: 1px solid #334155;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.sidebar.collapsed .logo-section {
+  flex: none;
 }
 
 .logo-text-container {
@@ -415,6 +443,35 @@
   bottom: 0;
   width: 3px;
   background: white;
+}
+
+/* Collapsed sidebar nav styling */
+.sidebar.collapsed .nav-item {
+  padding: 16px 12px;
+  justify-content: center;
+  border-radius: 8px;
+  margin: 4px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .nav-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.sidebar.collapsed .nav-item.active {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+}
+
+.sidebar.collapsed .nav-item.active::before {
+  display: none;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0;
 }
 
 .nav-icon {

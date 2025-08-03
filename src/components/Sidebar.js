@@ -69,12 +69,17 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
       <div className="sidebar-header">
         <div className="logo-section">
           <div className="logo-container">
-            <img 
-              src="/MIA LOOG 2.png" 
-              alt="MIA Logo" 
-              className="logo-icon"
-              style={{ width: '80px', height: 'auto' }}
-            />
+            <div className="logo-collapsed">
+              <img 
+                src="/MIA LOOG 2.png" 
+                alt="MIA Logo" 
+                className={`logo-icon ${isCollapsed ? 'collapsed-logo-icon' : ''}`}
+                style={{ 
+                  width: isCollapsed ? '40px' : '80px', 
+                  height: 'auto'
+                }}
+              />
+            </div>
             {!isCollapsed && (
               <div className="logo-text-container">
                 <h1 className="logo-title">Marketing Intelligence Agent</h1>
@@ -83,12 +88,14 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
           </div>
         </div>
         
-        <button 
-          className="collapse-btn"
-          onClick={() => onToggleCollapse && onToggleCollapse(!isCollapsed)}
-        >
-          {isCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
-        </button>
+        {!isCollapsed && (
+          <button 
+            className="collapse-btn"
+            onClick={() => onToggleCollapse && onToggleCollapse(!isCollapsed)}
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">

@@ -5,9 +5,10 @@ import {
   BarChart3, 
   Share2, 
   MessageSquare, 
-  Settings,
+  Info, // Replaced Settings
   LogOut,
   ChevronLeft,
+  TrendingUp,
   Menu,
   Clock,
   X
@@ -15,8 +16,10 @@ import {
 
 import './Sidebar.css';
 
-const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, isCollapsed }) => {
-  const [activeItem, setActiveItem] = useState('home');
+const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, isCollapsed, onNavigate, currentView, recentTools = [], activeItem: externalActiveItem, onActiveItemChange }) => {
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [internalActiveItem, setInternalActiveItem] = useState('home');
+  const activeItem = externalActiveItem || internalActiveItem;
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredChatHistory, setFilteredChatHistory] = useState(chatHistory);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -27,9 +30,8 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
   ];
 
   const recentItems = [
-    { id: 'sales', icon: BarChart3, label: 'Sales Analytics' },
-    { id: 'social', icon: Share2, label: 'Social Media' },
-    { id: 'campaign', icon: MessageSquare, label: 'Campaign Manager' },
+    { id: 'brand-analyzer', icon: TrendingUp, label: 'Brand Sentiment Analyzer' },
+    { id: 'social-insights', icon: Share2, label: 'Social Media Intelligence' },
   ];
 
   // Filter chat history based on search term
@@ -44,6 +46,18 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
       setFilteredChatHistory(filtered);
     }
   }, [searchTerm, chatHistory]);
+
+  // Close info tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showInfoTooltip && !event.target.closest('.info-item-wrapper')) {
+        setShowInfoTooltip(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showInfoTooltip]);
 
   const formatChatLabel = (query) => {
     return query.length > 30 ? query.substring(0, 30) + '...' : query;
@@ -61,7 +75,14 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
   };
 
   const handleItemClick = (itemId) => {
-    setActiveItem(itemId);
+    if (onActiveItemChange) {
+      onActiveItemChange(itemId);
+    } else {
+      setInternalActiveItem(itemId);
+    }
+    if (onNavigate) {
+      onNavigate(itemId);
+    }
   };
 
   return (
@@ -104,7 +125,7 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
             {menuItems.map((item) => (
               <li key={item.id}>
                 <button
-                  className={`nav-item ${activeItem === item.id ? 'active' : ''}`}
+                  className={`nav-item ${currentView === item.id ? 'active' : ''}`}
                   onClick={() => handleItemClick(item.id)}
                 >
                   <item.icon size={20} className="nav-icon" />
@@ -123,17 +144,37 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
             <div className="nav-section">
               <h3 className="section-title">RECENT</h3>
               <ul className="nav-list">
-                {recentItems.map((item) => (
-                  <li key={item.id}>
+                {/* Show most recently visited tools first */}
+                {recentTools.map((tool) => (
+                  <li key={tool.id}>
                     <button
-                      className={`nav-item ${activeItem === item.id ? 'active' : ''}`}
-                      onClick={() => handleItemClick(item.id)}
+                      className={`nav-item ${activeItem === tool.id ? 'active' : ''}`}
+                      onClick={() => handleItemClick(tool.id)}
+                      title={`${tool.name} (${tool.category})`}
                     >
-                      <item.icon size={18} className="nav-icon" />
-                      <span className="nav-label">{item.label}</span>
+                      {tool.icon && React.cloneElement(tool.icon, { size: 18, className: "nav-icon" })}
+                      <span className="nav-label">{tool.name}</span>
                     </button>
                   </li>
                 ))}
+                {/* Show default items below recent tools (only if not already in recent) */}
+                {recentItems
+                  .filter((item) => {
+                    // Hide default item if it's already in recent tools
+                    const isInRecent = recentTools.some(tool => tool.id === `tool-${item.id}`);
+                    return !isInRecent;
+                  })
+                  .map((item) => (
+                    <li key={item.id}>
+                      <button
+                        className={`nav-item ${activeItem === item.id ? 'active' : ''}`}
+                        onClick={() => handleItemClick(item.id)}
+                      >
+                        <item.icon size={18} className="nav-icon" />
+                        <span className="nav-label">{item.label}</span>
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -191,7 +232,16 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
                         <button
                           className={`nav-item chat-item ${activeItem === chat.id ? 'active' : ''}`}
                           onClick={() => {
-                            handleItemClick(chat.id);
+                            if (onActiveItemChange) {
+                              onActiveItemChange(chat.id);
+                            } else {
+                              setInternalActiveItem(chat.id);
+                            }
+                            // Navigate to home for chat history items
+                            if (onNavigate) {
+                              onNavigate('home');
+                            }
+                            // Load the selected chat
                             onChatSelect && onChatSelect(chat);
                           }}
                           title={chat.query}
@@ -232,18 +282,34 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
       </nav>
 
       <div className="sidebar-footer">
-        <button 
-          className="nav-item settings-btn"
-          onClick={() => handleItemClick('settings')}
-        >
-          <Settings size={20} className="nav-icon" />
-          {!isCollapsed && <span className="nav-label">Settings</span>}
-        </button>
-        
-        <button className="nav-item logout-btn" onClick={onLogout}>
-          <LogOut size={20} className="nav-icon" />
-          {!isCollapsed && <span className="nav-label">Logout</span>}
-        </button>
+        <ul className="nav-list">
+          <li className="info-item-wrapper">
+            <button className="nav-item" onClick={() => setShowInfoTooltip(!showInfoTooltip)}>
+              <Info size={20} className="nav-icon" />
+              {!isCollapsed && <span className="nav-label">Info</span>}
+            </button>
+            {showInfoTooltip && (
+              <div className="info-tooltip">
+                <div className="tooltip-level-up-header">Stay tuned, our tool is leveling up!</div>
+                <h4>About MIA</h4>
+                <p>MIA is the gateway to being Diageo marketeer's companion to making faster and smarter decisions. It's designed to provide actionable insights from complex marketing data.</p>
+                <h5>Key Features:</h5>
+                <ul>
+                  <li><strong>KPI Dashboard:</strong> Customizable view of key performance indicators.</li>
+                  <li><strong>Critical Attention:</strong> Proactive alerts for important events.</li>
+                  <li><strong>MIA Chat:</strong> Conversational interface to query data.</li>
+                  <li><strong>Discover:</strong> Explore powerful marketing intelligence tools.</li>
+                </ul>
+              </div>
+            )}
+          </li>
+          <li>
+            <button className="nav-item logout-btn" onClick={onLogout}>
+              <LogOut size={20} className="nav-icon" />
+              {!isCollapsed && <span className="nav-label">Logout</span>}
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   );

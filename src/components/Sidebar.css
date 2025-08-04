@@ -10,7 +10,7 @@
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .sidebar.collapsed {
@@ -132,7 +132,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  margin-bottom: 8px;
+  margin-bottom: 0 !important;
 }
 
 .chat-history-header .section-title-group {
@@ -329,7 +329,6 @@
   padding: 12px 20px;
   align-items: flex-start;
   border-radius: 8px;
-  margin-bottom: 4px;
   transition: all 0.3s ease;
   border: 1px solid transparent;
 }
@@ -562,6 +561,81 @@
 .chat-header .section-title,
 .sidebar .nav-badge {
   transition: opacity 0.2s ease;
+}
+
+/* Info Tooltip */
+.info-item-wrapper {
+  position: relative;
+}
+
+.info-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 16px;
+  width: 320px; /* Slightly wider */
+  background-color: var(--primary-color, #7C3AED); /* Use theme color */
+  color: #ffffff; /* White text for better contrast on color */
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+  z-index: 1100;
+  border: 1px solid transparent; /* Remove border or match bg */
+}
+
+.info-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -7px; /* Adjust position */
+  left: 24px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--primary-color, #7C3AED); /* Use theme color */
+  border-bottom: 1px solid transparent;
+  border-right: 1px solid transparent;
+  transform: rotate(45deg);
+}
+
+.info-tooltip h4 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f1f5f9; /* Pure white */
+}
+
+.info-tooltip p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.info-tooltip h5 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff; /* Match other text */
+}
+
+.info-tooltip ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.info-tooltip li {
+  margin-bottom: 8px;
+}
+
+.tooltip-level-up-header {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  padding: 8px 12px;
+  margin: -20px -20px 20px -20px; /* Extend to edges */
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
 }
 
 .sidebar.collapsed .nav-label,

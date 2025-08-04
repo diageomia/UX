@@ -1,16 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Share2, AlertTriangle, ChevronDown, ChevronUp, Bell, Search, Clock, User, Plus, Paperclip, MessageSquarePlus, Menu, X, RotateCcw } from 'lucide-react';
+import { Send, TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Share2, AlertTriangle, ChevronDown, ChevronUp, Bell, Search, Clock, User, Plus, Paperclip, MessageSquarePlus, Menu, X, RotateCcw, Copy, ThumbsUp, ThumbsDown, Bookmark } from 'lucide-react';
 
 import './Dashboard.css';
 import Sidebar from './Sidebar';
 import MetricCard from './MetricCard';
 import AlertCard from './AlertCard';
+import Discover from './Discover';
+import UserProfile from './UserProfile';
 
 const Dashboard = ({ onLogout }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isAlertsExpanded, setIsAlertsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
+  // Conversation messages for chat-like interface
+  const [conversation, setConversation] = useState([]);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackMessageId, setFeedbackMessageId] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [selectedFeedback, setSelectedFeedback] = useState([]);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [bookmarks, setBookmarks] = useState([]);
+  const [likedMessages, setLikedMessages] = useState(new Set());
+  const [dislikedMessages, setDislikedMessages] = useState(new Set());
+  const [copiedMessages, setCopiedMessages] = useState(new Set());
+  const [bookmarkedMessages, setBookmarkedMessages] = useState(new Set());
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  
+  const [userProfile, setUserProfile] = useState({
+    name: 'Sarah Smith',
+    role: 'Brand Manager',
+    theme: 'default'
+  });
+  const [savedPrompts, setSavedPrompts] = useState([]);
+  const [animatingButtons, setAnimatingButtons] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isKpiModalOpen, setIsKpiModalOpen] = useState(false);
@@ -18,6 +42,69 @@ const Dashboard = ({ onLogout }) => {
   const [selectedKpiCategory, setSelectedKpiCategory] = useState('all');
   // Track which KPIs have been selected in the modal before confirming
   const [selectedKpiIds, setSelectedKpiIds] = useState([]);
+  // View management
+  const [currentView, setCurrentView] = useState('home');
+  // Recent tools tracking
+  const [recentTools, setRecentTools] = useState([]);
+  // Active item in sidebar
+  const [activeItem, setActiveItem] = useState('home');
+  // Notifications state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'campaign',
+      title: 'Q4 Holiday Campaign Performance',
+      message: 'Your holiday campaign exceeded targets by 23%. ROI increased to 445%.',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      isRead: false,
+      priority: 'high'
+    },
+    {
+      id: 2,
+      type: 'budget',
+      title: 'Budget Approval Required',
+      message: 'Q1 2024 marketing budget requires your approval by Friday.',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      isRead: false,
+      priority: 'urgent'
+    },
+    {
+      id: 3,
+      type: 'social',
+      title: 'Social Media Milestone',
+      message: 'Your brand mentions reached 15K this week - a new record!',
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+      isRead: true,
+      priority: 'medium'
+    },
+    {
+      id: 4,
+      type: 'competitor',
+      title: 'Competitor Analysis Update',
+      message: 'New competitor pricing strategy detected. Analysis report ready.',
+      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+      isRead: true,
+      priority: 'medium'
+    },
+    {
+      id: 5,
+      type: 'system',
+      title: 'Weekly Performance Report',
+      message: 'Your weekly marketing performance report is now available.',
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+      isRead: true,
+      priority: 'low'
+    }
+  ]);
+
+  const themes = [
+    { id: 'default', name: 'Default Purple', primaryColor: '#7C3AED', secondaryColor: '#EC4899' },
+    { id: 'ocean', name: 'Ocean Blue', primaryColor: '#3B82F6', secondaryColor: '#06B6D4' },
+    { id: 'nature', name: 'Nature Green', primaryColor: '#10B981', secondaryColor: '#84CC16' },
+    { id: 'sunset', name: 'Sunset Orange', primaryColor: '#F59E0B', secondaryColor: '#EF4444' },
+    { id: 'teal', name: 'Teal Mint', primaryColor: '#14B8A6', secondaryColor: '#06B6D4' },
+  ];
   
   // Enhanced KPI data with values, changes, and categories - Only specified KPIs
   const availableKpis = {
@@ -232,6 +319,80 @@ const Dashboard = ({ onLogout }) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Close user profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileDropdown && !event.target.closest('.profile-container')) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileDropdown]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showNotifications && !event.target.closest('.notification-container')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
+
+  // Handle profile updates
+  const handleUpdateProfile = (updates) => {
+    setUserProfile(prev => ({ ...prev, ...updates }));
+    // Apply theme changes if theme was updated
+    if (updates.theme) {
+      applyTheme(updates.theme);
+    }
+  };
+
+  const handleThemeChange = (themeId) => {
+    setUserProfile(prev => ({ ...prev, theme: themeId }));
+    applyTheme(themeId);
+  };
+
+  // Apply theme to document
+  const applyTheme = (themeId) => {
+    const theme = themes.find(t => t.id === themeId) || themes[0];
+    document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
+    document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
+  };
+
+  // Extract prompts from bookmarked messages
+  useEffect(() => {
+    const prompts = bookmarks.map(bookmark => ({
+      id: bookmark.id,
+      text: bookmark.query || 'Bookmarked prompt',
+      savedAt: bookmark.savedAt
+    }));
+    setSavedPrompts(prompts);
+  }, [bookmarks]);
+
+  // Remove saved prompt
+  const handleRemovePrompt = (promptId) => {
+    setSavedPrompts(prev => prev.filter(p => p.id !== promptId));
+    // Also remove from bookmarks if it exists
+    setBookmarks(prev => prev.filter(b => b.id !== promptId));
+  };
+
+  // Helper function to trigger button animation
+  const triggerButtonAnimation = (buttonId) => {
+    setAnimatingButtons(prev => new Set([...prev, buttonId]));
+    setTimeout(() => {
+      setAnimatingButtons(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(buttonId);
+        return newSet;
+      });
+    }, 600); // Animation duration
+  };
+
   // KPI prompts mapping
   const kpiPrompts = {
     'Brand Awareness': 'What drove the 12% increase in brand awareness this quarter?',
@@ -280,14 +441,16 @@ const Dashboard = ({ onLogout }) => {
       type: 'critical',
       title: 'Q4 campaign budget needs approval by Friday',
       timeAgo: '2 days',
-      priority: 'HIGH'
+      priority: 'HIGH',
+      prompt: 'Help me prepare the Q4 budget proposal with ROI projections?'
     },
     {
       id: 2,
       type: 'medium',
       title: 'Competitor launched similar product - analysis needed',
       timeAgo: '1 week',
-      priority: 'MEDIUM'
+      priority: 'MEDIUM',
+      prompt: 'Analyze the competitor\'s new product launch and our response strategy?'
     }
   ];
 
@@ -303,6 +466,7 @@ const Dashboard = ({ onLogout }) => {
     const prompt = kpiPrompts[kpiTitle];
     if (prompt) {
       setSearchQuery(prompt);
+      setConversation([]); // Start fresh conversation
       // Scroll to MIA section
       document.querySelector('.chat-section')?.scrollIntoView({ 
         behavior: 'smooth',
@@ -404,44 +568,54 @@ const Dashboard = ({ onLogout }) => {
   // Handle search submit
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
+      // Add user message to conversation immediately
+      const userMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: searchQuery,
+        timestamp: new Date().toISOString()
+      };
+      
+      setConversation(prev => [...prev, userMessage]);
+      
+      // Clear search input and set loading
+      const currentQuery = searchQuery;
+      setSearchQuery('');
       setIsLoading(true);
       setAiResponse('');
       
-      // Scroll to response area
-      setTimeout(() => {
-        responseRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        });
-      }, 100);
-      
       // Simulate AI response delay
       setTimeout(() => {
-        const response = getAIResponse(searchQuery);
-        setAiResponse(response);
+        const response = getAIResponse(currentQuery);
+        
+        // Add AI response to conversation
+        const aiMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: response.text,
+          metrics: response.metrics,
+          timestamp: new Date().toISOString()
+        };
+        
+        setConversation(prev => [...prev, aiMessage]);
         setIsLoading(false);
         
-        // Auto-scroll to response after it's created
+        // Smooth scroll to show both latest chat and search input
         setTimeout(() => {
-          const chatContainer = document.querySelector('.dashboard-content');
-          const responseContainer = responseRef.current;
-          
-          if (chatContainer && responseContainer) {
-            // Scroll to show the response
-            responseContainer.scrollIntoView({ 
+          const searchContainer = document.querySelector('.mia-search-container');
+          if (searchContainer) {
+            searchContainer.scrollIntoView({ 
               behavior: 'smooth', 
-              block: 'start'
+              block: 'end',
+              inline: 'nearest'
             });
-            
-            // Also enable scrolling in the main container
-            chatContainer.style.overflow = 'auto';
           }
         }, 100);
         
-        // Add to chat history
+        // Add to legacy chat history for sidebar
         const newChatItem = {
           id: Date.now().toString(),
-          query: searchQuery,
+          query: currentQuery,
           response: response.text,
           timestamp: new Date().toISOString(),
           metrics: response.metrics
@@ -509,17 +683,178 @@ const Dashboard = ({ onLogout }) => {
   const handleClearChat = () => {
     setSearchQuery('');
     setAiResponse('');
+    setConversation([]);
+    setIsLoading(false);
     // Optionally clear chat history if needed
     // setChatHistory([]);
+  };
+
+  // Response action handlers
+  const handleCopyResponse = async (content, messageId) => {
+    try {
+      // Trigger animation
+      triggerButtonAnimation(`copy-${messageId}`);
+      
+      // Toggle copied state
+      setCopiedMessages(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(messageId)) {
+          newSet.delete(messageId);
+          return newSet;
+        } else {
+          newSet.add(messageId);
+          // Copy to clipboard only when selecting (not when deselecting)
+          navigator.clipboard.writeText(content);
+          setToastMessage('Copied to clipboard');
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 1500);
+          return newSet;
+        }
+      });
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const handleThumbsUp = (messageId) => {
+    // Trigger animation
+    triggerButtonAnimation(`thumbsup-${messageId}`);
+    
+    // Remove from disliked if it was disliked
+    setDislikedMessages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+    
+    // Toggle liked state
+    setLikedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleThumbsDown = (messageId) => {
+    // Trigger animation
+    triggerButtonAnimation(`thumbsdown-${messageId}`);
+    
+    // Remove from liked if it was liked
+    setLikedMessages(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+    
+    // Add to disliked
+    setDislikedMessages(prev => {
+      const newSet = new Set(prev);
+      newSet.add(messageId);
+      return newSet;
+    });
+    
+    setFeedbackMessageId(messageId);
+    setSelectedFeedback([]);
+    setFeedbackText('');
+    setShowFeedbackModal(true);
+  };
+
+  const handleSaveResponse = (messageId, content) => {
+    // Trigger animation
+    triggerButtonAnimation(`bookmark-${messageId}`);
+    
+    // Toggle bookmarked state
+    setBookmarkedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        // Remove bookmark
+        newSet.delete(messageId);
+        setBookmarks(bookmarksPrev => bookmarksPrev.filter(b => b.id !== messageId));
+        return newSet;
+      } else {
+        // Add bookmark
+        newSet.add(messageId);
+        const message = conversation.find(msg => msg.id === messageId);
+        if (message) {
+          const bookmark = {
+            id: messageId,
+            content: content,
+            query: message.query || '',
+            timestamp: message.timestamp,
+            savedAt: new Date().toISOString()
+          };
+          setBookmarks(bookmarksPrev => [bookmark, ...bookmarksPrev]);
+          // Show toast notification
+          setToastMessage('Prompt saved to your profile');
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 3000);
+        }
+        return newSet;
+      }
+    });
+  };
+
+  const toggleFeedbackOption = (feedbackType) => {
+    setSelectedFeedback(prev => 
+      prev.includes(feedbackType)
+        ? prev.filter(type => type !== feedbackType)
+        : [...prev, feedbackType]
+    );
+  };
+
+  const handleFeedbackSubmit = () => {
+    const feedback = {
+      messageId: feedbackMessageId,
+      selectedOptions: selectedFeedback,
+      text: feedbackText
+    };
+    
+    // Feedback submitted - could be sent to analytics service
+    
+    // Close modal and reset state
+    setShowFeedbackModal(false);
+    setFeedbackMessageId(null);
+    setSelectedFeedback([]);
+    setFeedbackText('');
+    
+    // Show thank you toast
+    setToastMessage('Thanks for your feedback');
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000); // Hide after 3 seconds
   };
   
   // Handle chat selection from sidebar
   const handleChatSelect = (chat) => {
-    setSearchQuery(chat.query);
+    setSearchQuery('');
     setAiResponse({
       text: chat.response,
       metrics: chat.metrics
     });
+    
+    // Load conversation from history
+    const historyConversation = [
+      {
+        id: 'history-user',
+        type: 'user',
+        content: chat.query,
+        timestamp: chat.timestamp
+      },
+      {
+        id: 'history-ai',
+        type: 'ai',
+        content: chat.response,
+        metrics: chat.metrics,
+        timestamp: chat.timestamp
+      }
+    ];
+    
+    setConversation(historyConversation);
     
     // Scroll to response area
     setTimeout(() => {
@@ -530,6 +865,103 @@ const Dashboard = ({ onLogout }) => {
     }, 100);
   };
 
+  // Handle alert click to populate chatbot with prompt
+  const handleAlertClick = (alert) => {
+    setSearchQuery(alert.prompt);
+    setAiResponse(''); // Clear any existing response
+    setConversation([]); // Start fresh conversation
+    
+    // Scroll to MIA chatbot section
+    document.querySelector('.chat-section')?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'center'
+    });
+  };
+
+  // Navigation handler
+  const handleNavigation = (viewId) => {
+    setCurrentView(viewId);
+    setActiveItem(viewId);
+    
+    // Scroll to top when navigating to home or discover
+    if (viewId === 'home' || viewId === 'discover') {
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
+  };
+
+  // Notification handlers
+  const handleNotificationToggle = () => {
+    setShowNotifications(prev => !prev);
+  };
+
+  const handleNotificationRead = (notificationId) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === notificationId 
+          ? { ...notification, isRead: true }
+          : notification
+      )
+    );
+  };
+
+  const handleMarkAllRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, isRead: true }))
+    );
+  };
+
+  const handleClearNotification = (notificationId) => {
+    setNotifications(prev => 
+      prev.filter(notification => notification.id !== notificationId)
+    );
+  };
+
+  const getUnreadCount = () => {
+    return notifications.filter(n => !n.isRead).length;
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    } else if (hours < 24) {
+      return `${hours}h ago`;
+    } else {
+      return `${days}d ago`;
+    }
+  };
+
+  // Handle tool visits from Discover
+  const handleToolVisit = (tool) => {
+    const recentTool = {
+      id: `tool-${tool.id}`,
+      name: tool.name,
+      category: tool.category,
+      icon: tool.icon,
+      visitedAt: new Date().toISOString()
+    };
+
+    setRecentTools(prev => {
+      // Remove if already exists to avoid duplicates
+      const filtered = prev.filter(item => item.id !== recentTool.id);
+      // Add to beginning and limit to 5 recent items
+      return [recentTool, ...filtered].slice(0, 5);
+    });
+    
+    // Set the clicked tool as active in sidebar
+    setActiveItem(`tool-${tool.id}`);
+  };
+
   return (
     <div className="dashboard">
       <Sidebar 
@@ -538,6 +970,11 @@ const Dashboard = ({ onLogout }) => {
         onChatSelect={handleChatSelect}
         onToggleCollapse={setIsSidebarCollapsed}
         isCollapsed={isSidebarCollapsed}
+        onNavigate={handleNavigation}
+        currentView={currentView}
+        recentTools={recentTools}
+        activeItem={activeItem}
+        onActiveItemChange={setActiveItem}
       />
       
       {/* Expand button when sidebar is collapsed */}
@@ -552,28 +989,128 @@ const Dashboard = ({ onLogout }) => {
       )}
       
       <main className={`dashboard-main ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        <header className="dashboard-header">
-          <div className="header-content">
-            <div className="welcome-section">
-              <h1 className="welcome-title">
-                Hey Sarah! 👋
-              </h1>
-              <p className="welcome-subtitle">
-                Welcome back, Brand Manager at Diageo
-              </p>
-            </div>
-            
-            <div className="header-actions">
-              <button className="notification-btn">
-                <Bell size={20} />
-                <span className="notification-badge">3</span>
-              </button>
-              <button className="profile-btn">
-                <User size={20} />
-              </button>
-            </div>
-          </div>
-        </header>
+        {currentView === 'home' && (
+          <>
+            <header className="dashboard-header">
+              <div className="header-content">
+                <div className="welcome-section">
+                  <h1 className="welcome-title">
+                    Hey Sarah! 👋
+                  </h1>
+                  <p className="welcome-subtitle">
+                    Welcome back, Brand Manager at Diageo
+                  </p>
+                </div>
+                
+                <div className="header-actions">
+                  <div className="notification-container">
+                    <button 
+                      className="notification-btn"
+                      onClick={handleNotificationToggle}
+                      title="Notifications"
+                    >
+                      <Bell size={20} />
+                      {getUnreadCount() > 0 && (
+                        <span className="notification-badge">{getUnreadCount()}</span>
+                      )}
+                    </button>
+                    
+                    {/* Notifications Dropdown */}
+                    {showNotifications && (
+                      <div className="notifications-dropdown">
+                        <div className="notifications-header">
+                          <h3>Notifications</h3>
+                          <div className="notifications-actions">
+                            {getUnreadCount() > 0 && (
+                              <button 
+                                className="mark-all-read-btn"
+                                onClick={handleMarkAllRead}
+                                title="Mark all as read"
+                              >
+                                Mark all read
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="notifications-list">
+                          {notifications.length === 0 ? (
+                            <div className="no-notifications">
+                              <Bell size={24} color="#94a3b8" />
+                              <p>No notifications yet</p>
+                            </div>
+                          ) : (
+                            notifications.map(notification => (
+                              <div 
+                                key={notification.id}
+                                className={`notification-item ${!notification.isRead ? 'unread' : ''} priority-${notification.priority}`}
+                                onClick={() => handleNotificationRead(notification.id)}
+                              >
+                                <div className="notification-content">
+                                  <div className="notification-header">
+                                    <h4 className="notification-title">{notification.title}</h4>
+                                    <div className="notification-meta">
+                                      <span className="notification-time">{formatTimeAgo(notification.timestamp)}</span>
+                                      <button 
+                                        className="notification-close"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleClearNotification(notification.id);
+                                        }}
+                                        title="Remove notification"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <p className="notification-message">{notification.message}</p>
+                                  <div className="notification-footer">
+                                    <span className={`notification-type type-${notification.type}`}>
+                                      {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                                    </span>
+                                    {!notification.isRead && <div className="unread-indicator"></div>}
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        
+                        {notifications.length > 0 && (
+                          <div className="notifications-footer">
+                            <p className="notifications-count">
+                              {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
+                              {getUnreadCount() > 0 && ` • ${getUnreadCount()} unread`}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="profile-container">
+                    <button 
+                      className="profile-btn"
+                      onClick={() => setShowProfileDropdown(prev => !prev)}
+                      title={`${userProfile.name} - ${userProfile.role}`}
+                    >
+                      <User size={20} />
+                    </button>
+                    
+                    {/* User Profile Dropdown */}
+                    <UserProfile
+                      isOpen={showProfileDropdown}
+                      onClose={() => setShowProfileDropdown(false)}
+                      userProfile={userProfile}
+                      onUpdateProfile={handleUpdateProfile}
+                      savedPrompts={savedPrompts}
+                      onRemovePrompt={handleRemovePrompt}
+                      themes={themes}
+                      onThemeChange={handleThemeChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </header>
 
         <div className="dashboard-content">
           {/* KPIs Section */}
@@ -627,7 +1164,7 @@ const Dashboard = ({ onLogout }) => {
             
             <div className={`alerts-container ${isAlertsExpanded ? 'expanded' : 'collapsed'}`}>
               {alerts.map((alert) => (
-                <AlertCard key={alert.id} {...alert} />
+                <AlertCard key={alert.id} {...alert} onClick={() => handleAlertClick(alert)} />
               ))}
             </div>
           </section>
@@ -650,57 +1187,102 @@ const Dashboard = ({ onLogout }) => {
               </div>
             </div>
 
-            {/* AI Response Section */}
-            {(isLoading || aiResponse) && (
-              <div className="mia-response-container" ref={responseRef}>
-                {isLoading ? (
-                  <div className="response-loading">
-                    
-                    <div className="loading-text">
-                      <div className="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+            {/* Conversation Interface */}
+            {(conversation.length > 0 || isLoading) && (
+              <div className="conversation-container" ref={responseRef}>
+                {conversation.map((message) => (
+                  <div key={message.id} className={`message ${message.type}`}>
+                    {message.type === 'user' ? (
+                      <div className="user-message">
+                        <div className="message-content">
+                          <p>{message.content}</p>
+                        </div>
                       </div>
-                      <p>MIA is analyzing your data...</p>
-                      <div className="loading-progress">
-                        <div className="progress-bar"></div>
-                      </div>
-                    </div>
-                  </div>
-                ) : aiResponse && (
-                  <div className="ai-response">
-                    <div className="response-header">
-                      <div className="response-avatar">
-                        <img 
-                          src="/MIA LOOG 2.png" 
-                          alt="MIA Logo" 
-                          style={{ width: '24px', height: 'auto' }}
-                        />
-                      </div>
-                      <div className="response-meta">
-                        <h4>MIA Analysis</h4>
-                        <span className="response-time">Just now</span>
-                      </div>
-                    </div>
-                    <div className="response-content">
-                      <div className="response-text">
-                        {aiResponse.text.split('\n').map((line, index) => (
-                          <p key={index}>{line}</p>
-                        ))}
-                      </div>
-                      {aiResponse.metrics && (
-                        <div className="response-metrics">
-                          <h5>Key KPIs</h5>
-                          <div className="metrics-tags">
-                            {aiResponse.metrics.map((metric, index) => (
-                              <span key={index} className="metric-tag">
-                                {metric}
-                              </span>
+                    ) : (
+                      <div className="ai-message">
+                        <div className="message-content">
+                          <div className="response-header">
+                            <h4>MIA Analysis</h4>
+                            <span className="response-time">Just now</span>
+                          </div>
+                          <div className="response-text">
+                            {message.content.split('\n').map((line, index) => (
+                              <p key={index}>{line}</p>
                             ))}
                           </div>
+                          {message.metrics && (
+                            <div className="response-metrics">
+                              <h5>Key KPIs</h5>
+                              <div className="metrics-tags">
+                                {message.metrics.map((metric, index) => (
+                                  <span key={index} className="metric-tag">
+                                    {metric}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Response Action Buttons */}
+                          <div className="response-actions">
+                            <button 
+                              className={`action-btn ${copiedMessages.has(message.id) ? 'selected' : ''} ${animatingButtons.has(`copy-${message.id}`) ? 'animating' : ''}`}
+                              onClick={() => handleCopyResponse(message.content, message.id)}
+                              title="Copy"
+                            >
+                              <Copy size={16} />
+                            </button>
+                            
+                            {/* Show thumbs up only if not disliked */}
+                            {!dislikedMessages.has(message.id) && (
+                              <button 
+                                className={`action-btn ${likedMessages.has(message.id) ? 'liked' : ''} ${animatingButtons.has(`thumbsup-${message.id}`) ? 'animating' : ''}`}
+                                onClick={() => handleThumbsUp(message.id)}
+                                title="Good response"
+                              >
+                                <ThumbsUp size={16} />
+                              </button>
+                            )}
+                            
+                            {/* Show thumbs down only if not liked */}
+                            {!likedMessages.has(message.id) && (
+                              <button 
+                                className={`action-btn ${dislikedMessages.has(message.id) ? 'disliked' : ''} ${animatingButtons.has(`thumbsdown-${message.id}`) ? 'animating' : ''}`}
+                                onClick={() => handleThumbsDown(message.id)}
+                                title="Bad response"
+                              >
+                                <ThumbsDown size={16} />
+                              </button>
+                            )}
+                            
+                            <button 
+                              className={`action-btn ${bookmarkedMessages.has(message.id) ? 'bookmarked' : ''} ${animatingButtons.has(`bookmark-${message.id}`) ? 'animating' : ''}`}
+                              onClick={() => handleSaveResponse(message.id, message.content)}
+                              title="Save prompt for later"
+                            >
+                              <Bookmark size={16} />
+                            </button>
+                          </div>
                         </div>
-                      )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Loading indicator for new messages */}
+                {isLoading && (
+                  <div className="message ai">
+                    <div className="ai-message">
+                      <div className="message-content">
+                        <div className="response-loading">
+                          <div className="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </div>
+                          <p>MIA is analyzing your data...</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -749,7 +1331,7 @@ const Dashboard = ({ onLogout }) => {
               </div>
               
               {/* Clear Chat Option */}
-              {aiResponse && (
+              {(conversation.length > 0 || aiResponse) && (
                 <div className="clear-chat-container">
                   <button 
                     className="clear-chat-btn"
@@ -772,6 +1354,24 @@ const Dashboard = ({ onLogout }) => {
             </div>
           </section>
         </div>
+          </>
+        )}
+
+        {currentView === 'discover' && <Discover onToolVisit={handleToolVisit} onNavigate={handleNavigation} />}
+        
+        {currentView !== 'home' && currentView !== 'discover' && (
+          <div className="coming-soon">
+            <div className="coming-soon-content">
+              <p>** User to be redirected to the Tool Page**</p>
+              <button 
+                className="back-home-btn"
+                onClick={() => handleNavigation('home')}
+              >
+                Back to Home
+              </button>
+            </div>
+          </div>
+        )}
       </main>
       
       {/* KPI Selection Modal */}
@@ -1006,6 +1606,114 @@ const Dashboard = ({ onLogout }) => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="modal-overlay" onClick={() => setShowFeedbackModal(false)}>
+          <div className="feedback-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="feedback-header">
+              <h3>Tell us more</h3>
+              <button 
+                className="modal-close-btn"
+                onClick={() => setShowFeedbackModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="feedback-content">
+              <div className="feedback-options">
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('memory') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('memory')}
+                >
+                  Shouldn't have used Memory
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('personality') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('personality')}
+                >
+                  Don't like the personality
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('style') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('style')}
+                >
+                  Don't like the style
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('factual') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('factual')}
+                >
+                  Not factually correct
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('instructions') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('instructions')}
+                >
+                  Didn't fully follow instructions
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('refused') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('refused')}
+                >
+                  Refused when it shouldn't have
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('lazy') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('lazy')}
+                >
+                  Being lazy
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('unsafe') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('unsafe')}
+                >
+                  Unsafe or problematic
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('biased') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('biased')}
+                >
+                  Biased
+                </button>
+                <button 
+                  className={`feedback-option-btn ${selectedFeedback.includes('other') ? 'selected' : ''}`}
+                  onClick={() => toggleFeedbackOption('other')}
+                >
+                  Other
+                </button>
+              </div>
+              
+              <textarea 
+                className="feedback-textarea"
+                placeholder="(Optional) Feel free to add specific details"
+                rows={4}
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+              />
+              
+              <div className="feedback-disclaimer">
+                <p>Submitting feedback will include this full conversation to help improve MIA, even if 'Improve the model for everyone' is turned off. <a href="#">Learn more</a></p>
+              </div>
+              
+              <div className="feedback-actions">
+                <button className="feedback-submit-btn" onClick={handleFeedbackSubmit}>
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast-notification">
+          {toastMessage}
         </div>
       )}
     </div>

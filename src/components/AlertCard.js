@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, Clock, X } from 'lucide-react';
 import './AlertCard.css';
 
-const AlertCard = ({ id, type, title, timeAgo, priority }) => {
+const AlertCard = ({ id, type, title, timeAgo, priority, onClick }) => {
   const getPriorityConfig = (priority) => {
     switch (priority) {
       case 'HIGH':
@@ -46,7 +46,9 @@ const AlertCard = ({ id, type, title, timeAgo, priority }) => {
 
   const handleClick = () => {
     // Handle alert click
-    console.log(`Clicked alert ${id}`);
+    if (onClick) {
+      onClick();
+    }
   };
 
   return (

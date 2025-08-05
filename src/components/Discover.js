@@ -4,10 +4,10 @@ import './Discover.css';
 
 const Discover = ({ onToolVisit, onNavigate }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('featured');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
-    { id: 'featured', label: 'Featured' },
+    { id: 'all', label: 'All Tools' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'social', label: 'Social Media' },
     { id: 'campaigns', label: 'Campaign Tools' },
@@ -158,8 +158,8 @@ const Discover = ({ onToolVisit, onNavigate }) => {
   const getCategoryCount = (categoryId, categoryLabel) => {
     let tools;
     
-    if (categoryId === 'featured') {
-      tools = featuredTools;
+    if (categoryId === 'all') {
+      tools = allTools;
     } else {
       tools = allTools.filter(tool => tool.category === categoryLabel);
     }
@@ -167,9 +167,7 @@ const Discover = ({ onToolVisit, onNavigate }) => {
     // Apply search filter if search term exists
     if (searchTerm) {
       tools = tools.filter(tool => 
-        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.category.toLowerCase().includes(searchTerm.toLowerCase())
+        tool.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -177,9 +175,9 @@ const Discover = ({ onToolVisit, onNavigate }) => {
   };
 
   const getFilteredTools = () => {
-    let tools = selectedCategory === 'featured' ? featuredTools : allTools;
+    let tools = allTools;
     
-    if (selectedCategory !== 'featured') {
+    if (selectedCategory !== 'all') {
       const categoryName = categories.find(cat => cat.id === selectedCategory)?.label;
       if (categoryName && selectedCategory !== 'all') {
         tools = tools.filter(tool => tool.category === categoryName);
@@ -188,9 +186,7 @@ const Discover = ({ onToolVisit, onNavigate }) => {
 
     if (searchTerm) {
       tools = tools.filter(tool => 
-        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tool.category.toLowerCase().includes(searchTerm.toLowerCase())
+        tool.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -239,43 +235,78 @@ const Discover = ({ onToolVisit, onNavigate }) => {
       </div>
 
       <div className="discover-content">
-        {selectedCategory === 'featured' && !searchTerm && (
+        {selectedCategory === 'all' && !searchTerm && (
           <div className="featured-section">
-            <div className="section-header">
-              <h2 className="section-title">Featured Tools</h2>
-              <p className="section-subtitle">Curated top picks for marketing intelligence</p>
-            </div>
-            
-            <div className="tools-grid featured-grid">
-              {featuredTools.map((tool) => (
-                <div 
-                  key={tool.id} 
-                  className="tool-card featured-card clickable"
-                  onClick={() => handleToolInteraction(tool)}
-                >
-                  <div className="tool-card-header">
-                    <div className="tool-icon" style={{ background: tool.gradient }}>
-                      {tool.icon}
+            {/* All Available Tools Section - Now First */}
+            <div className="all-tools-section">
+              <div className="section-header">
+                <h2 className="section-title">All Available Tools</h2>
+                <p className="section-subtitle">{allTools.length} marketing intelligence tools</p>
+              </div>
+              
+              <div className="tools-grid">
+                {allTools.map((tool) => (
+                  <div 
+                    key={`all-${tool.id}`} 
+                    className="tool-card clickable"
+                    onClick={() => handleToolInteraction(tool)}
+                  >
+                    <div className="tool-card-header">
+                      <div className="tool-icon" style={{ background: tool.gradient }}>
+                        {tool.icon}
+                      </div>
                     </div>
-                    {tool.trending && <div className="trending-badge">Trending</div>}
-                  </div>
-                  <div className="tool-card-content">
-                    <h3 className="tool-name">{tool.name}</h3>
-                    <p className="tool-description">{tool.description}</p>
-                    <div className="tool-meta">
-                      <span className="tool-category">{tool.category}</span>
-                      <span className="tool-author">By {tool.author}</span>
+                    <div className="tool-card-content">
+                      <h3 className="tool-name">{tool.name}</h3>
+                      <p className="tool-description">{tool.description}</p>
+                      <div className="tool-meta">
+                        <span className="tool-category">{tool.category}</span>
+                        <span className="tool-author">By {tool.author}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Trending Section */}
+            {/* Featured Tools Section - Now Second */}
+            <div className="featured-tools-section">
+              <div className="section-header">
+                <h2 className="section-title">Featured Tools</h2>
+                <p className="section-subtitle">Curated top picks for marketing intelligence</p>
+              </div>
+              
+              <div className="tools-grid featured-grid">
+                {featuredTools.map((tool) => (
+                  <div 
+                    key={tool.id} 
+                    className="tool-card featured-card clickable"
+                    onClick={() => handleToolInteraction(tool)}
+                  >
+                    <div className="tool-card-header">
+                      <div className="tool-icon" style={{ background: tool.gradient }}>
+                        {tool.icon}
+                      </div>
+                      {tool.trending && <div className="trending-badge">Trending</div>}
+                    </div>
+                    <div className="tool-card-content">
+                      <h3 className="tool-name">{tool.name}</h3>
+                      <p className="tool-description">{tool.description}</p>
+                      <div className="tool-meta">
+                        <span className="tool-category">{tool.category}</span>
+                        <span className="tool-author">By {tool.author}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trending Section - Now Third */}
             <div className="trending-section">
               <div className="section-header">
                 <h2 className="section-title">Trending This Week</h2>
-                <p className="section-subtitle">Most popular tools among marketing teams</p>
+                <p className="section-subtitle">Most popular tools among Brand Managers</p>
               </div>
               
               <div className="tools-grid trending-grid">
@@ -306,7 +337,7 @@ const Discover = ({ onToolVisit, onNavigate }) => {
           </div>
         )}
 
-        {(selectedCategory !== 'featured' || searchTerm) && (
+        {(selectedCategory !== 'all' || searchTerm) && (
           <div className="tools-section">
             <div className="section-header">
               <h2 className="section-title">

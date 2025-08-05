@@ -31,7 +31,7 @@ const Dashboard = ({ onLogout }) => {
   const [userProfile, setUserProfile] = useState({
     name: 'Sarah Smith',
     role: 'Brand Manager',
-    theme: 'default'
+    mode: 'light'
   });
   const [savedPrompts, setSavedPrompts] = useState([]);
   const [animatingButtons, setAnimatingButtons] = useState(new Set());
@@ -98,12 +98,10 @@ const Dashboard = ({ onLogout }) => {
     }
   ]);
 
-  const themes = [
-    { id: 'default', name: 'Default Purple', primaryColor: '#7C3AED', secondaryColor: '#EC4899' },
-    { id: 'ocean', name: 'Ocean Blue', primaryColor: '#3B82F6', secondaryColor: '#06B6D4' },
-    { id: 'nature', name: 'Nature Green', primaryColor: '#10B981', secondaryColor: '#84CC16' },
-    { id: 'sunset', name: 'Sunset Orange', primaryColor: '#F59E0B', secondaryColor: '#EF4444' },
-    { id: 'teal', name: 'Teal Mint', primaryColor: '#14B8A6', secondaryColor: '#06B6D4' },
+  const modes = [
+    { id: 'light', name: 'Light Mode', description: 'Clean and bright interface', icon: '☀️' },
+    { id: 'dark', name: 'Dark Mode', description: 'Easy on the eyes for low-light environments', icon: '🌙' },
+    { id: 'colorblind', name: 'Color Blind', description: 'Optimized for color vision accessibility', icon: '🎨' },
   ];
   
   // Enhanced KPI data with values, changes, and categories - Only specified KPIs
@@ -352,16 +350,18 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  const handleThemeChange = (themeId) => {
-    setUserProfile(prev => ({ ...prev, theme: themeId }));
-    applyTheme(themeId);
+  const handleModeChange = (modeId) => {
+    setUserProfile(prev => ({ ...prev, mode: modeId }));
+    applyMode(modeId);
   };
 
-  // Apply theme to document
-  const applyTheme = (themeId) => {
-    const theme = themes.find(t => t.id === themeId) || themes[0];
-    document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
-    document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
+  // Apply mode to document
+  const applyMode = (modeId) => {
+    const mode = modes.find(m => m.id === modeId) || modes[0];
+    // Remove existing mode classes
+    document.documentElement.classList.remove('light-mode', 'dark-mode', 'colorblind-mode');
+    // Add new mode class
+    document.documentElement.classList.add(`${modeId}-mode`);
   };
 
   // Extract prompts from bookmarked messages
@@ -1104,8 +1104,8 @@ const Dashboard = ({ onLogout }) => {
                       onUpdateProfile={handleUpdateProfile}
                       savedPrompts={savedPrompts}
                       onRemovePrompt={handleRemovePrompt}
-                      themes={themes}
-                      onThemeChange={handleThemeChange}
+                      modes={modes}
+                      onModeChange={handleModeChange}
                     />
                   </div>
                 </div>

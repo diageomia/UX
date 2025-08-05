@@ -10,13 +10,12 @@ const UserProfile = ({
   onUpdateProfile, 
   savedPrompts, 
   onRemovePrompt,
-  themes,
-  onThemeChange
+  modes,
+  onModeChange
 }) => {
   const [activeSection, setActiveSection] = useState(null);
   const [editForm, setEditForm] = useState({
-    name: userProfile.name,
-    role: userProfile.role
+    name: userProfile.name
   });
   const [isEditing, setIsEditing] = useState(false);
 
@@ -26,16 +25,7 @@ const UserProfile = ({
     }
   }, [isOpen]);
 
-  const roles = [
-    'Brand Manager',
-    'Marketing Director', 
-    'Campaign Manager',
-    'Digital Marketing Specialist',
-    'Content Marketing Manager',
-    'Social Media Manager',
-    'Marketing Analyst',
-    'Product Marketing Manager'
-  ];
+
 
   const handleSave = () => {
     onUpdateProfile(editForm);
@@ -45,14 +35,13 @@ const UserProfile = ({
   const handleSectionToggle = (section) => {
     setActiveSection(prev => (prev === section ? null : section));
     if (section === 'editing') {
-      setEditForm({ name: userProfile.name, role: userProfile.role });
+      setEditForm({ name: userProfile.name });
     }
   };
 
   const handleCancel = () => {
     setEditForm({
-      name: userProfile.name,
-      role: userProfile.role
+      name: userProfile.name
     });
     setIsEditing(false);
     setActiveSection(null); // Close the section
@@ -127,17 +116,7 @@ const UserProfile = ({
                 />
               </div>
               
-              <div className="form-group">
-                <label>Role</label>
-                <select
-                  value={editForm.role}
-                  onChange={(e) => setEditForm({...editForm, role: e.target.value})}
-                >
-                  {roles.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-              </div>
+
               
               <div className="form-buttons">
                 <button className="save-btn" onClick={handleSave}>
@@ -159,17 +138,20 @@ const UserProfile = ({
           <div className="profile-divider"></div>
           <div className="profile-settings-section">
             <h4>Settings</h4>
-            <div className="theme-selection-section">
-              <h5>Change Theme</h5>
-              <div className="theme-options">
-                {themes.map(theme => (
+            <div className="mode-selection-section">
+              <h5>Change Mode</h5>
+              <div className="mode-options">
+                {modes.map(mode => (
                   <div 
-                    key={theme.id}
-                    className={`theme-swatch ${userProfile.theme === theme.id ? 'active' : ''}`}
-                    style={{ background: theme.primaryColor }}
-                    onClick={() => onThemeChange(theme.id)}
+                    key={mode.id}
+                    className={`mode-option ${userProfile.mode === mode.id ? 'active' : ''}`}
+                    onClick={() => onModeChange(mode.id)}
                   >
-                    <div className="theme-swatch-secondary" style={{ background: theme.secondaryColor }}></div>
+                    <div className="mode-icon">{mode.icon}</div>
+                    <div className="mode-content">
+                      <h6 className="mode-name">{mode.name}</h6>
+                      <p className="mode-description">{mode.description}</p>
+                    </div>
                   </div>
                 ))}
               </div>

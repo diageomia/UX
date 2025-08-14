@@ -292,7 +292,7 @@ const Sidebar = ({ onLogout, chatHistory = [], onChatSelect, onToggleCollapse, i
               <div className="info-tooltip">
                 <div className="tooltip-level-up-header">Stay tuned, our tool is leveling up!</div>
                 <h4>About MIA</h4>
-                <p>MIA is the gateway to being Diageo marketeer's companion to making faster and smarter decisions. It's designed to provide actionable insights from complex marketing data.</p>
+                <p>MIA is the gateway to being marketeer's companion to making faster and smarter decisions. It's designed to provide actionable insights from complex marketing data.</p>
                 <h5>Key Features:</h5>
                 <ul>
                   <li><strong>KPI Dashboard:</strong> Customizable view of key performance indicators.</li>

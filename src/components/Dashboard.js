@@ -998,7 +998,7 @@ const Dashboard = ({ onLogout }) => {
                     Hey Sarah! 👋
                   </h1>
                   <p className="welcome-subtitle">
-                    Welcome back, Brand Manager at Diageo
+                    Welcome back, Brand Manager
                   </p>
                 </div>
                 

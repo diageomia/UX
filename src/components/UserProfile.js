@@ -63,7 +63,7 @@ const UserProfile = ({
         <div className="profile-info">
           <h3>{userProfile.name}</h3>
           <p>{userProfile.role}</p>
-          <p className="profile-email">sarah.smith@diageo.com</p>
+          <p className="profile-email">sarah.smith@xyz.com</p>
         </div>
       </div>
 
